@@ -1,12 +1,12 @@
 package com.example.jetpackapp
 
 import android.Manifest
-import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresPermission
@@ -36,7 +36,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.example.jetpackapp.ui.theme.JetpackAppTheme
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -44,7 +43,15 @@ import com.google.android.gms.tasks.CancellationTokenSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.util.Locale
 
+
+/**
+ * Sensor activity
+ *
+ * On app launch, it asks for all necessary permissions.
+ * It checks for permissions before showing the location.
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,7 +69,7 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier.fillMaxSize(),
                                 color = MaterialTheme.colorScheme.background
                             ) {
-//                                ShowInfo("Tim", "Bloomington, Indiana", "45")
+                                // Checks for permissions on coarse location
                                 if (ActivityCompat.checkSelfPermission(
                                         this,
                                         Manifest.permission.ACCESS_COARSE_LOCATION
@@ -70,32 +77,40 @@ class MainActivity : ComponentActivity() {
                                 ) {
                                     Log.d("Current location","Permission Not Granted")
                                 } else {
+                                    // calls current location Jetpack compose
                                     CurrentLocationContent(false)
-                                    Log.d("Current location","Permission Granted")
+                                    Log.d("Coarse location","Permission Granted")
                                 }
                             }
                         }
                     }
                 } else -> {
-                // No location access granted.
-            }
+                    Log.d("No Permissions", "")
+                }
             }
         }
 
         locationPermissionRequest.launch(arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION))
-
-
     }
 }
 
+// Function gets the location based on lat long
+private fun getLocation(context: Context, lat: Double, long: Double): String? {
+    val state: String?
+    val city: String?
+    val geoCoder = Geocoder(context, Locale.getDefault())
+    val address = geoCoder.getFromLocation(lat,long,3)
+
+    state = address?.get(0)?.adminArea
+    city = address?.get(0)?.locality
+//    return state
+    return "$city, $state"
+}
 
 
-
-
-
-
+// just a testing function to see how jetpack works
 @Composable
 fun ShowInfo(name: String, location: String, temperature: String) {
     Column(
@@ -113,13 +128,9 @@ fun ShowInfo(name: String, location: String, temperature: String) {
     }
 }
 
-
-
 @RequiresPermission(
     anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
 )
-
-
 
 @Composable
 fun CurrentLocationContent(usePreciseLocation: Boolean) {
@@ -142,28 +153,6 @@ fun CurrentLocationContent(usePreciseLocation: Boolean) {
     ) {
         Button(
             onClick = {
-                // getting last known location is faster and minimizes battery usage
-                // This information may be out of date.
-                // Location may be null as previously no client has access location
-                // or location turned of in device setting.
-                // Please handle for null case as well as additional check can be added before using the method
-                scope.launch(Dispatchers.IO) {
-                    val result = locationClient.lastLocation.await()
-                    locationInfo = if (result == null) {
-                        "No last known location. Try fetching the current location first"
-                    } else {
-                        "Current location is \n" + "lat : ${result.latitude}\n" +
-                                "long : ${result.longitude}\n" + "fetched at ${System.currentTimeMillis()}"
-                    }
-                }
-            },
-        ) {
-            Text("Get last known location")
-        }
-
-        Button(
-            onClick = {
-                //To get more accurate or fresher device location use this method
                 scope.launch(Dispatchers.IO) {
                     val priority = if (usePreciseLocation) {
                         Priority.PRIORITY_HIGH_ACCURACY
@@ -174,10 +163,11 @@ fun CurrentLocationContent(usePreciseLocation: Boolean) {
                         priority,
                         CancellationTokenSource().token,
                     ).await()
+                    // if there is a result, use fetchedLocation and assign locationInfo
                     result?.let { fetchedLocation ->
                         locationInfo =
-                            "Current location is \n" + "lat : ${fetchedLocation.latitude}\n" +
-                                    "long : ${fetchedLocation.longitude}\n" + "fetched at ${System.currentTimeMillis()}"
+                            "Current location is:\n" + getLocation(context, fetchedLocation.latitude, fetchedLocation.longitude).toString()
+
                     }
                 }
             },
@@ -186,6 +176,7 @@ fun CurrentLocationContent(usePreciseLocation: Boolean) {
         }
         Text(
             text = locationInfo,
+            modifier = Modifier.align(Alignment.Start)
         )
     }
 }
