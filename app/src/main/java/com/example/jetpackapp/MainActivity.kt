@@ -1,6 +1,7 @@
 package com.example.jetpackapp
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Geocoder
@@ -78,6 +79,7 @@ class MainActivity : ComponentActivity() {
                                     Log.d("Current location","Permission Not Granted")
                                 } else {
                                     // calls current location Jetpack compose
+                                    getCoords()
                                     CurrentLocationContent(false)
                                     Log.d("Coarse location","Permission Granted")
                                 }
@@ -89,6 +91,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
 
         locationPermissionRequest.launch(arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -105,8 +108,39 @@ private fun getLocation(context: Context, lat: Double, long: Double): String? {
 
     state = address?.get(0)?.adminArea
     city = address?.get(0)?.locality
-//    return state
     return "$city, $state"
+}
+
+@SuppressLint("CoroutineCreationDuringComposition")
+@RequiresPermission(
+    anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
+)
+
+@Composable
+private fun getCoords(): String? {
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val locationClient = remember {
+        LocationServices.getFusedLocationProviderClient(context)
+    }
+    var locationInfo by remember {
+        mutableStateOf("")
+    }
+    scope.launch(Dispatchers.IO) {
+        val priority = Priority.PRIORITY_BALANCED_POWER_ACCURACY
+        val result = locationClient.getCurrentLocation(
+            priority,
+            CancellationTokenSource().token,
+        ).await()
+        // if there is a result, use fetchedLocation and assign locationInfo
+        result?.let { fetchedLocation ->
+            locationInfo =
+                "Current location is:\n" + getLocation(context,
+                    fetchedLocation.latitude, fetchedLocation.longitude).toString()
+        }
+    }
+
+    return locationInfo
 }
 
 
@@ -131,6 +165,7 @@ fun ShowInfo(name: String, location: String, temperature: String) {
 @RequiresPermission(
     anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
 )
+
 
 @Composable
 fun CurrentLocationContent(usePreciseLocation: Boolean) {
@@ -166,8 +201,8 @@ fun CurrentLocationContent(usePreciseLocation: Boolean) {
                     // if there is a result, use fetchedLocation and assign locationInfo
                     result?.let { fetchedLocation ->
                         locationInfo =
-                            "Current location is:\n" + getLocation(context, fetchedLocation.latitude, fetchedLocation.longitude).toString()
-
+                            "Current location is:\n" + getLocation(context,
+                                fetchedLocation.latitude, fetchedLocation.longitude).toString()
                     }
                 }
             },
