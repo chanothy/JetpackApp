@@ -78,9 +78,8 @@ class MainActivity : ComponentActivity() {
                                 ) {
                                     Log.d("Current location","Permission Not Granted")
                                 } else {
-                                    // calls current location Jetpack compose
-                                    getCoords()
-                                    CurrentLocationContent(false)
+                                    // Shows info with SensorsView, gets info with getCoords
+                                    SensorsView(getCoords().toString())
                                     Log.d("Coarse location","Permission Granted")
                                 }
                             }
@@ -100,7 +99,7 @@ class MainActivity : ComponentActivity() {
 }
 
 // Function gets the location based on lat long
-private fun getLocation(context: Context, lat: Double, long: Double): String? {
+private fun getLocation(context: Context, lat: Double, long: Double): String {
     val state: String?
     val city: String?
     val geoCoder = Geocoder(context, Locale.getDefault())
@@ -168,15 +167,15 @@ fun ShowInfo(name: String, location: String, temperature: String) {
 
 
 @Composable
-fun CurrentLocationContent(usePreciseLocation: Boolean) {
+fun SensorsView(locationInfo: String) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val locationClient = remember {
         LocationServices.getFusedLocationProviderClient(context)
     }
-    var locationInfo by remember {
-        mutableStateOf("")
-    }
+//    var locationInfo by remember {
+//        mutableStateOf("")
+//    }
 
     Column(
         Modifier
@@ -186,29 +185,6 @@ fun CurrentLocationContent(usePreciseLocation: Boolean) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Button(
-            onClick = {
-                scope.launch(Dispatchers.IO) {
-                    val priority = if (usePreciseLocation) {
-                        Priority.PRIORITY_HIGH_ACCURACY
-                    } else {
-                        Priority.PRIORITY_BALANCED_POWER_ACCURACY
-                    }
-                    val result = locationClient.getCurrentLocation(
-                        priority,
-                        CancellationTokenSource().token,
-                    ).await()
-                    // if there is a result, use fetchedLocation and assign locationInfo
-                    result?.let { fetchedLocation ->
-                        locationInfo =
-                            "Current location is:\n" + getLocation(context,
-                                fetchedLocation.latitude, fetchedLocation.longitude).toString()
-                    }
-                }
-            },
-        ) {
-            Text(text = "Get current location")
-        }
         Text(
             text = locationInfo,
             modifier = Modifier.align(Alignment.Start)
