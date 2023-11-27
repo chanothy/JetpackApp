@@ -8,22 +8,6 @@ import android.hardware.Sensor
  * Sensor classes that extend Android sensors.
  */
 
-class LightSensor(
-    context: Context
-): AndroidSensor(
-    context = context,
-    sensorFeature = PackageManager.FEATURE_SENSOR_LIGHT,
-    sensorType = Sensor.TYPE_LIGHT
-)
-
-class AccelerometerSensor(
-    context: Context
-): AndroidSensor(
-    context = context,
-    sensorFeature = PackageManager.FEATURE_SENSOR_ACCELEROMETER,
-    sensorType = Sensor.TYPE_ACCELEROMETER
-)
-
 class TemperatureSensor(
     context: Context
 ): AndroidSensor(
@@ -32,7 +16,7 @@ class TemperatureSensor(
     sensorType = Sensor.TYPE_AMBIENT_TEMPERATURE
 )
 
-class PressureSensor(
+class HumiditySensor(
     context: Context
 ): AndroidSensor(
     context = context,

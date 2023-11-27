@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sensorsViewModel = ViewModelProvider(this).get(SensorsViewModel::class.java)
-        sensorsViewModel.initializeSensors(TemperatureSensor(applicationContext))
+        sensorsViewModel.initializeSensors(TemperatureSensor(applicationContext),HumiditySensor(applicationContext))
 
         val locationPermissionRequest = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
@@ -185,11 +185,18 @@ class MainActivity : ComponentActivity() {
         var temperature by remember {
             mutableStateOf("")
         }
+        var humidity by remember {
+            mutableStateOf("")
+        }
 
         locationInfo = location
         temperature = sensorsViewModel.ambientTemperature.observeAsState("").value.toString()
+        humidity = sensorsViewModel.humidity.observeAsState("").value.toString()
 
-        Log.d("Temperature State Viewing", sensorsViewModel.ambientTemperature.observeAsState("").value.toString())
+
+        Log.d("Temperature Viewing", temperature)
+        Log.d("Humid Viewing", humidity)
+
 
 
         Column(

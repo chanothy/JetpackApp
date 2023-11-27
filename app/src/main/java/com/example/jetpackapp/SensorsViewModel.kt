@@ -14,19 +14,23 @@ import androidx.lifecycle.ViewModel
 class SensorsViewModel : ViewModel() {
 
     private lateinit var temperatureSensor: MeasurableSensor
+    private lateinit var pressureSensor: MeasurableSensor
+
 
     // sensor info
     var ambientTemperature: MutableLiveData<Float> = MutableLiveData()
+    var humidity: MutableLiveData<Float> = MutableLiveData()
 
-
-    fun initializeSensors(sTemperature: MeasurableSensor) {
-        //initialize light sensor
+    fun initializeSensors(sTemperature: MeasurableSensor, sPressure: MeasurableSensor) {
         temperatureSensor = sTemperature
+        pressureSensor = sPressure
         temperatureSensor.startListening()
+        pressureSensor.startListening()
         temperatureSensor.setOnSensorValuesChangedListener { values ->
             ambientTemperature.value = values[0]
-            Log.d("Temperature",ambientTemperature.value.toString())
         }
-
+        pressureSensor.setOnSensorValuesChangedListener { values ->
+            humidity.value = values[0]
+        }
     }
 }
