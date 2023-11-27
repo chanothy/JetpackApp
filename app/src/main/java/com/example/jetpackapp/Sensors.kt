@@ -31,3 +31,11 @@ class TemperatureSensor(
     sensorFeature = PackageManager.FEATURE_SENSOR_AMBIENT_TEMPERATURE,
     sensorType = Sensor.TYPE_AMBIENT_TEMPERATURE
 )
+
+class PressureSensor(
+    context: Context
+): AndroidSensor(
+    context = context,
+    sensorFeature = PackageManager.FEATURE_SENSOR_RELATIVE_HUMIDITY,
+    sensorType = Sensor.TYPE_RELATIVE_HUMIDITY
+)

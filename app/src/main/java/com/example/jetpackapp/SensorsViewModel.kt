@@ -16,7 +16,8 @@ class SensorsViewModel : ViewModel() {
     private lateinit var temperatureSensor: MeasurableSensor
 
     // sensor info
-    var ambientTemperature: MutableLiveData<Float> = MutableLiveData(0.00F)
+    var ambientTemperature: MutableLiveData<Float> = MutableLiveData()
+
 
     fun initializeSensors(sTemperature: MeasurableSensor) {
         //initialize light sensor

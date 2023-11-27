@@ -24,6 +24,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -36,6 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.jetpackapp.ui.theme.JetpackAppTheme
 import com.google.android.gms.location.LocationServices
@@ -59,7 +61,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         sensorsViewModel = ViewModelProvider(this).get(SensorsViewModel::class.java)
         sensorsViewModel.initializeSensors(TemperatureSensor(applicationContext))
-
 
         val locationPermissionRequest = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
@@ -171,17 +172,25 @@ class MainActivity : ComponentActivity() {
         anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
     )
 
-
     @Composable
-    fun SensorsView(locationInfo: String) {
+    fun SensorsView(location: String) {
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
         val locationClient = remember {
             LocationServices.getFusedLocationProviderClient(context)
         }
-//    var locationInfo by remember {
-//        mutableStateOf("")
-//    }
+        var locationInfo by remember {
+            mutableStateOf("")
+        }
+        var temperature by remember {
+            mutableStateOf("")
+        }
+
+        locationInfo = location
+        temperature = sensorsViewModel.ambientTemperature.observeAsState("").value.toString()
+
+        Log.d("Temperature State Viewing", sensorsViewModel.ambientTemperature.observeAsState("").value.toString())
+
 
         Column(
             Modifier
@@ -201,6 +210,10 @@ class MainActivity : ComponentActivity() {
             )
             Text(
                 text = locationInfo,
+                modifier = Modifier.align(Alignment.Start)
+            )
+            Text(
+                text = "Temperature: $temperature",
                 modifier = Modifier.align(Alignment.Start)
             )
         }

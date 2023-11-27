@@ -60,6 +60,7 @@ dependencies {
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.1.1")
     implementation ("com.google.android.gms:play-services-location:18.0.0")
+    implementation ("androidx.compose.runtime:runtime-livedata:1.0.0-beta01")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
