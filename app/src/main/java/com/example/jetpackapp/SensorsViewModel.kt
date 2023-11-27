@@ -1,5 +1,6 @@
 package com.example.jetpackapp
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
@@ -23,6 +24,7 @@ class SensorsViewModel : ViewModel() {
         temperatureSensor.startListening()
         temperatureSensor.setOnSensorValuesChangedListener { values ->
             ambientTemperature.value = values[0]
+            Log.d("Temperature",ambientTemperature.value.toString())
         }
 
     }
