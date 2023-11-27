@@ -25,8 +25,7 @@ class GestureActivity : ComponentActivity() {
                     Greeting2("Android")
                 }
             }
-        }
-    }
+        }    }
 }
 
 @Composable

@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -37,6 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.ViewModelProvider
 import com.example.jetpackapp.ui.theme.JetpackAppTheme
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -48,14 +48,19 @@ import java.util.Locale
 
 
 /**
- * Sensor activity
+ * Main Activity
  *
  * On app launch, it asks for all necessary permissions.
  * It checks for permissions before showing the location.
  */
 class MainActivity : ComponentActivity() {
+    private lateinit var sensorsViewModel: SensorsViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        sensorsViewModel = ViewModelProvider(this).get(SensorsViewModel::class.java)
+        sensorsViewModel.initializeSensors(TemperatureSensor(applicationContext))
+
+
         val locationPermissionRequest = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
@@ -91,112 +96,125 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-
         locationPermissionRequest.launch(arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION))
     }
-}
 
-// Function gets the location based on lat long
-private fun getLocation(context: Context, lat: Double, long: Double): String {
-    val state: String?
-    val city: String?
-    val geoCoder = Geocoder(context, Locale.getDefault())
-    val address = geoCoder.getFromLocation(lat,long,3)
+    // Function gets the location based on lat long
+    private fun getLocation(context: Context, lat: Double, long: Double): String {
+        val state: String?
+        val city: String?
+        val geoCoder = Geocoder(context, Locale.getDefault())
+        val address = geoCoder.getFromLocation(lat,long,3)
 
-    state = address?.get(0)?.adminArea
-    city = address?.get(0)?.locality
-    return "$city, $state"
-}
-
-@SuppressLint("CoroutineCreationDuringComposition")
-@RequiresPermission(
-    anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
-)
-
-@Composable
-private fun getCoords(): String? {
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    val locationClient = remember {
-        LocationServices.getFusedLocationProviderClient(context)
+        state = address?.get(0)?.adminArea
+        city = address?.get(0)?.locality
+        return "City: $city\nState: $state"
     }
-    var locationInfo by remember {
-        mutableStateOf("")
+
+    private fun getTemp() {
     }
-    scope.launch(Dispatchers.IO) {
-        val priority = Priority.PRIORITY_BALANCED_POWER_ACCURACY
-        val result = locationClient.getCurrentLocation(
-            priority,
-            CancellationTokenSource().token,
-        ).await()
-        // if there is a result, use fetchedLocation and assign locationInfo
-        result?.let { fetchedLocation ->
-            locationInfo =
-                "Current location is:\n" + getLocation(context,
-                    fetchedLocation.latitude, fetchedLocation.longitude).toString()
+
+    @SuppressLint("CoroutineCreationDuringComposition")
+    @RequiresPermission(
+        anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
+    )
+
+    @Composable
+    private fun getCoords(): String? {
+        val scope = rememberCoroutineScope()
+        val context = LocalContext.current
+        val locationClient = remember {
+            LocationServices.getFusedLocationProviderClient(context)
+        }
+        var locationInfo by remember {
+            mutableStateOf("")
+        }
+        scope.launch(Dispatchers.IO) {
+            val priority = Priority.PRIORITY_BALANCED_POWER_ACCURACY
+            val result = locationClient.getCurrentLocation(
+                priority,
+                CancellationTokenSource().token,
+            ).await()
+            // if there is a result, use fetchedLocation and assign locationInfo
+            result?.let { fetchedLocation ->
+                locationInfo =
+                    getLocation(context,
+                        fetchedLocation.latitude, fetchedLocation.longitude)
+            }
+        }
+
+        return locationInfo
+    }
+
+
+    // just a testing function to see how jetpack works
+    @Composable
+    fun ShowInfo(name: String, location: String, temperature: String) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = "Name: $name", style = TextStyle(fontSize = 24.sp))
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "Location: $location", style = TextStyle(fontSize = 18.sp))
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "Temperature: $temperature", style = TextStyle(fontSize = 18.sp))
         }
     }
 
-    return locationInfo
-}
+    @RequiresPermission(
+        anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
+    )
 
 
-// just a testing function to see how jetpack works
-@Composable
-fun ShowInfo(name: String, location: String, temperature: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Name: $name", style = TextStyle(fontSize = 24.sp))
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "Location: $location", style = TextStyle(fontSize = 18.sp))
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "Temperature: $temperature", style = TextStyle(fontSize = 18.sp))
-    }
-}
-
-@RequiresPermission(
-    anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
-)
-
-
-@Composable
-fun SensorsView(locationInfo: String) {
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    val locationClient = remember {
-        LocationServices.getFusedLocationProviderClient(context)
-    }
+    @Composable
+    fun SensorsView(locationInfo: String) {
+        val scope = rememberCoroutineScope()
+        val context = LocalContext.current
+        val locationClient = remember {
+            LocationServices.getFusedLocationProviderClient(context)
+        }
 //    var locationInfo by remember {
 //        mutableStateOf("")
 //    }
 
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .animateContentSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(
-            text = locationInfo,
-            modifier = Modifier.align(Alignment.Start)
-        )
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .animateContentSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = "Sensors Playground\n",
+                style = TextStyle(fontSize = 30.sp)
+            )
+            Text(
+                text = "Tim Chan",
+                modifier = Modifier.align(Alignment.Start)
+            )
+            Text(
+                text = locationInfo,
+                modifier = Modifier.align(Alignment.Start)
+            )
+        }
+    }
+
+    // For showing previews
+    @Preview(showBackground = true)
+    @Composable
+    fun GreetingPreview() {
+        JetpackAppTheme {
+        }
     }
 }
 
-// For showing previews
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    JetpackAppTheme {
-    }
-}
+
+
 
