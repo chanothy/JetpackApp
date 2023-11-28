@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -39,6 +40,10 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.jetpackapp.ui.theme.JetpackAppTheme
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -76,18 +81,7 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier.fillMaxSize(),
                                 color = MaterialTheme.colorScheme.background
                             ) {
-                                // Checks for permissions on coarse location
-                                if (ActivityCompat.checkSelfPermission(
-                                        this,
-                                        Manifest.permission.ACCESS_COARSE_LOCATION
-                                    ) != PackageManager.PERMISSION_GRANTED
-                                ) {
-                                    Log.d("Current location","Permission Not Granted")
-                                } else {
-                                    // Shows info with SensorsView, gets info with getCoords
-                                    SensorsView(getCoords().toString())
-                                    Log.d("Coarse location","Permission Granted")
-                                }
+                                Start()
                             }
                         }
                     }
@@ -123,7 +117,7 @@ class MainActivity : ComponentActivity() {
     )
 
     @Composable
-    private fun getCoords(): String? {
+    private fun getCoords(): String {
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
         val locationClient = remember {
@@ -173,7 +167,7 @@ class MainActivity : ComponentActivity() {
     )
 
     @Composable
-    fun SensorsView(location: String) {
+    fun SensorsView(location: String, navController: NavController) {
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
         val locationClient = remember {
@@ -193,11 +187,8 @@ class MainActivity : ComponentActivity() {
         temperature = sensorsViewModel.ambientTemperature.observeAsState("").value.toString()
         humidity = sensorsViewModel.humidity.observeAsState("").value.toString()
 
-
         Log.d("Temperature Viewing", temperature)
         Log.d("Humid Viewing", humidity)
-
-
 
         Column(
             Modifier
@@ -216,13 +207,64 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier.align(Alignment.Start)
             )
             Text(
-                text = locationInfo,
+                text = "Location:\n$locationInfo",
                 modifier = Modifier.align(Alignment.Start)
             )
             Text(
-                text = "Temperature: $temperature",
+                text = "\nTemperature: $temperature",
                 modifier = Modifier.align(Alignment.Start)
             )
+            Text(
+                text = "\nHumidity: $humidity",
+                modifier = Modifier.align(Alignment.Start)
+            )
+            Button(
+                onClick = { navController.navigate("GesturesView") },
+            ) {
+                Text(text = "Gestures Playground")
+            }
+        }
+    }
+
+
+    @Composable
+    fun GesturesView(navController: NavController) {
+        val scope = rememberCoroutineScope()
+        val context = LocalContext.current
+
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .animateContentSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = "Bruh\n",
+                style = TextStyle(fontSize = 30.sp)
+            )
+        }
+    }
+
+
+    @Composable
+    fun Start() {
+        val navController = rememberNavController()
+
+        NavHost(navController = navController, startDestination = "SensorsView") {
+            // Checks for permissions on coarse location
+            if (ActivityCompat.checkSelfPermission(
+                    applicationContext,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                Log.d("Current location","Permission Not Granted")
+            } else {
+                // Shows info with SensorsView, gets info with getCoords
+                composable("SensorsView") { SensorsView(getCoords(),navController = navController) }
+                composable("GesturesView") { GesturesView(navController = navController) }
+            }
         }
     }
 
