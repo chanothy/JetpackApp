@@ -108,14 +108,13 @@ class MainActivity : ComponentActivity() {
         return "City: $city\nState: $state"
     }
 
-    private fun getTemp() {
-    }
 
     @SuppressLint("CoroutineCreationDuringComposition")
     @RequiresPermission(
         anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
     )
 
+    // gets lat long
     @Composable
     private fun getCoords(): String {
         val scope = rememberCoroutineScope()
@@ -166,6 +165,7 @@ class MainActivity : ComponentActivity() {
         anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
     )
 
+    // Sensors Screen
     @Composable
     fun SensorsView(location: String, navController: NavController) {
         val scope = rememberCoroutineScope()
@@ -226,7 +226,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
+    // Gestures screen
     @Composable
     fun GesturesView(navController: NavController) {
         val scope = rememberCoroutineScope()
@@ -247,7 +247,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
+    /**
+     * Main composable, contains navgraph, and permission checking for getCoords()
+     * Called in onCreate().
+     */
     @Composable
     fun Start() {
         val navController = rememberNavController()
