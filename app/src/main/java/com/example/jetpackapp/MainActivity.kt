@@ -3,6 +3,7 @@ package com.example.jetpackapp
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.os.Bundle
@@ -44,6 +45,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.findNavController
 import com.example.jetpackapp.ui.theme.JetpackAppTheme
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -219,11 +221,18 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier.align(Alignment.Start)
             )
             Button(
-                onClick = { navController.navigate("GesturesView") },
+                onClick = { navigateToGestures() },
             ) {
                 Text(text = "Gestures Playground")
             }
         }
+    }
+
+    fun navigateToGestures()
+    {
+        //navController.navigate("GesturesView")
+        val nav = Intent(this@MainActivity, GestureActivity::class.java)
+        startActivity(nav)
     }
 
     // Gestures screen
