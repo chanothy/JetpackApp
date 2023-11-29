@@ -212,7 +212,7 @@ class MainActivity : ComponentActivity() {
         var fling = Modifier
             .pointerInput(Unit) {
                 detectDragGestures(
-                    onDrag = { change, dragAmount ->
+                    onDrag = { change, _ ->
                         change.consume()
                         direction = 1
                     },
