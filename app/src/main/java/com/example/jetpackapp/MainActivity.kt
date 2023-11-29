@@ -102,6 +102,7 @@ class MainActivity : ComponentActivity() {
         sensorsViewModel = ViewModelProvider(this).get(SensorsViewModel::class.java)
         sensorsViewModel.initializeSensors(TemperatureSensor(applicationContext),HumiditySensor(applicationContext))
 
+        // asks for permissions
         val locationPermissionRequest = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
@@ -136,7 +137,7 @@ class MainActivity : ComponentActivity() {
         val state: String?
         val city: String?
         val geoCoder = Geocoder(context, Locale.getDefault())
-        val address = geoCoder.getFromLocation(lat,long,3)
+        val address = geoCoder.getFromLocation(lat,long,1)
 
         state = address?.get(0)?.adminArea
         city = address?.get(0)?.locality
@@ -209,6 +210,7 @@ class MainActivity : ComponentActivity() {
 
         var direction by remember { mutableStateOf(-1)}
 
+        // on fling
         var fling = Modifier
             .pointerInput(Unit) {
                 detectDragGestures(
@@ -267,6 +269,7 @@ class MainActivity : ComponentActivity() {
     }
 
 
+    // navigate to gestures
     fun navigateToGestures()
     {
         //navController.navigate("GesturesView")
