@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.drawable.GradientDrawable
 import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
@@ -12,14 +13,30 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresPermission
+import androidx.compose.animation.Animatable
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.calculateTargetValue
+import androidx.compose.animation.rememberSplineBasedDecay
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Arrangement.Absolute.Center
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -33,9 +50,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.consumeAllChanges
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -54,6 +76,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.Locale
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.ExperimentalComposeApi
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.unit.Dp
+import kotlinx.coroutines.coroutineScope
 
 
 /**
@@ -83,7 +116,7 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier.fillMaxSize(),
                                 color = MaterialTheme.colorScheme.background
                             ) {
-                                Start()
+                                begin_app()
                             }
                         }
                     }
@@ -145,24 +178,8 @@ class MainActivity : ComponentActivity() {
     }
 
 
-    // just a testing function to see how jetpack works
-    @Composable
-    fun ShowInfo(name: String, location: String, temperature: String) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(text = "Name: $name", style = TextStyle(fontSize = 24.sp))
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Location: $location", style = TextStyle(fontSize = 18.sp))
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Temperature: $temperature", style = TextStyle(fontSize = 18.sp))
-        }
-    }
 
+    @OptIn(ExperimentalFoundationApi::class)
     @RequiresPermission(
         anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
     )
@@ -188,6 +205,22 @@ class MainActivity : ComponentActivity() {
         locationInfo = location
         temperature = sensorsViewModel.ambientTemperature.observeAsState("").value.toString()
         humidity = sensorsViewModel.humidity.observeAsState("").value.toString()
+
+
+        var direction by remember { mutableStateOf(-1)}
+        var mod = Modifier
+            .pointerInput(Unit) {
+                detectDragGestures(
+                    onDrag = { change, dragAmount ->
+                        change.consume()
+                        val (x, y) = dragAmount
+                        if (direction != -1) {
+                            direction = -1
+                            navigateToGestures()
+                        }
+                    }
+                )
+            }
 
         Log.d("Temperature Viewing", temperature)
         Log.d("Humid Viewing", humidity)
@@ -221,12 +254,14 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier.align(Alignment.Start)
             )
             Button(
-                onClick = { navigateToGestures() },
+                modifier = mod,
+                onClick = { },
             ) {
                 Text(text = "Gestures Playground")
             }
         }
     }
+
 
     fun navigateToGestures()
     {
@@ -235,33 +270,13 @@ class MainActivity : ComponentActivity() {
         startActivity(nav)
     }
 
-    // Gestures screen
-    @Composable
-    fun GesturesView(navController: NavController) {
-        val scope = rememberCoroutineScope()
-        val context = LocalContext.current
-
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .animateContentSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = "Bruh\n",
-                style = TextStyle(fontSize = 30.sp)
-            )
-        }
-    }
 
     /**
      * Main composable, contains navgraph, and permission checking for getCoords()
      * Called in onCreate().
      */
     @Composable
-    fun Start() {
+    fun begin_app() {
         val navController = rememberNavController()
 
         NavHost(navController = navController, startDestination = "SensorsView") {
@@ -275,7 +290,6 @@ class MainActivity : ComponentActivity() {
             } else {
                 // Shows info with SensorsView, gets info with getCoords
                 composable("SensorsView") { SensorsView(getCoords(),navController = navController) }
-                composable("GesturesView") { GesturesView(navController = navController) }
             }
         }
     }
