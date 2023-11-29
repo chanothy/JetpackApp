@@ -18,8 +18,8 @@ class SensorsViewModel : ViewModel() {
 
 
     // sensor info
-    var ambientTemperature: MutableLiveData<Float> = MutableLiveData()
-    var humidity: MutableLiveData<Float> = MutableLiveData()
+    var ambientTemperature: MutableLiveData<Float> = MutableLiveData(68f)
+    var humidity: MutableLiveData<Float> = MutableLiveData(52f)
 
     fun initializeSensors(sTemperature: MeasurableSensor, sPressure: MeasurableSensor) {
         temperatureSensor = sTemperature

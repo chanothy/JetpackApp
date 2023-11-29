@@ -208,17 +208,21 @@ class MainActivity : ComponentActivity() {
 
 
         var direction by remember { mutableStateOf(-1)}
-        var mod = Modifier
+
+        var fling = Modifier
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDrag = { change, dragAmount ->
                         change.consume()
-                        val (x, y) = dragAmount
+                        direction = 1
+                    },
+                    onDragEnd = {
                         if (direction != -1) {
                             direction = -1
                             navigateToGestures()
                         }
                     }
+
                 )
             }
 
@@ -254,7 +258,7 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier.align(Alignment.Start)
             )
             Button(
-                modifier = mod,
+                modifier = fling,
                 onClick = { },
             ) {
                 Text(text = "Gestures Playground")
