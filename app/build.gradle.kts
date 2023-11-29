@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.jetpackapp"
+    namespace = "project.gesture.sensorsgesture"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.example.jetpackapp"
+        applicationId = "project.gesture.sensorsgesture"
         minSdk = 24
         targetSdk = 33
         versionCode = 1

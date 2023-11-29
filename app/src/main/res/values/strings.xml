@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">JetpackApp</string>
+    <string name="app_name">SensorsGesture</string>
     <string name="title_activity_gesture">GestureActivity</string>
 </resources>

@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "JetpackApp"
+rootProject.name = "SensorsGestureApp"
 include(":app")
  
