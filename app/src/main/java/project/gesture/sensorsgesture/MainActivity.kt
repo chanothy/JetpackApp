@@ -148,7 +148,7 @@ class MainActivity : ComponentActivity() {
         return "City: $city\nState: $state"
     }
 
-
+    // requires perms
     @SuppressLint("CoroutineCreationDuringComposition")
     @RequiresPermission(
         anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],

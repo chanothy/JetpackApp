@@ -234,6 +234,8 @@ fun Greeting2(name: String, modifier: Modifier = Modifier) {
     )
 }
 
+// testing function
+
 @Composable
 fun GreetingPreview2() {
     SensorsGestureAppTheme {
