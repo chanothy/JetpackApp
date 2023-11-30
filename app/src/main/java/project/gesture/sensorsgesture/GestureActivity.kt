@@ -49,6 +49,12 @@ import androidx.compose.ui.unit.toSize
 import project.gesture.sensorsgesture.ui.theme.SensorsGestureAppTheme
 import java.lang.Math.abs
 
+/**
+ * Gesture Activity
+ *
+ * Takes care of logic relating to swiping ball.
+ */
+
 class GestureActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,6 +86,10 @@ enum class GestureType
     DOUBLE_TAP,
 }
 
+// for the text
+/**
+ * @param - gestureType, takes gesture type and returns the right text
+ */
 fun GestureTypeToString(gestureType: GestureType) : String
 {
     return when (gestureType)
@@ -99,6 +109,7 @@ fun GestureCanvas(modifier: Modifier = Modifier.fillMaxSize()) {
     var direction by remember { mutableStateOf(-1)}
     var gesturesHistory: List<GestureType> by remember { mutableStateOf(listOf()) }
     val ballSize = 20F
+    // modifier for the swiping actions
     var mod = Modifier
         .fillMaxWidth()
         .height(Dp(300F))
@@ -145,6 +156,7 @@ fun GestureCanvas(modifier: Modifier = Modifier.fillMaxSize()) {
                     }
 
                 },
+                // depending on direction will add different text to list view
                 onDragEnd = {
                     val (width, height) = size
                     when (direction) {
@@ -197,7 +209,7 @@ fun GestureCanvas(modifier: Modifier = Modifier.fillMaxSize()) {
 }
 
 
-
+// message row item look
 @Composable
 fun MessageRow(gestureType: GestureType, index: Int)
 {

@@ -132,6 +132,11 @@ class MainActivity : ComponentActivity() {
     }
 
     // Function gets the location based on lat long
+    /**
+     * @param - lat
+     * @param - long
+     * Takes lat and long and returns the city state info
+     */
     private fun getLocation(context: Context, lat: Double, long: Double): String {
         val state: String?
         val city: String?
@@ -184,7 +189,11 @@ class MainActivity : ComponentActivity() {
         anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
     )
 
+
     // Sensors Screen
+    /**
+     * Takes location and uses
+     */
     @Composable
     fun SensorsView(location: String, navController: NavController) {
         val scope = rememberCoroutineScope()
@@ -278,7 +287,7 @@ class MainActivity : ComponentActivity() {
 
 
     /**
-     * Main composable, contains navgraph, and permission checking for getCoords()
+     * Main composable and permission checking for getCoords()
      * Called in onCreate().
      */
     @Composable
