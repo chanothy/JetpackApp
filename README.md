@@ -25,6 +25,7 @@ The following **extensions** are implemented:
 ## Video Walkthrough
 
 Here's a walkthrough of implemented user stories:
+![jetpack](https://github.com/chanothy/SensorGestureApp/assets/53064235/9fe543bb-905b-4aa0-bb19-5618d675c920)
 
 
 
