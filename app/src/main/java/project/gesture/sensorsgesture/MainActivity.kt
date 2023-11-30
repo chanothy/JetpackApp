@@ -243,7 +243,7 @@ class MainActivity : ComponentActivity() {
                 style = TextStyle(fontSize = 30.sp)
             )
             Text(
-                text = "Tim Chan",
+                text = "Tim Chan and Grayson Clark",
                 modifier = Modifier.align(Alignment.Start)
             )
             Text(
