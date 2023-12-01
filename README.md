@@ -19,7 +19,7 @@ Google Play testing track
 The following **extensions** are implemented:
 
 * Jetpack Compose
-* none
+* Gestures
 * ...
 
 ## Video Walkthrough
@@ -31,8 +31,7 @@ Here's a walkthrough of implemented user stories:
 
 
 ## Notes
-
-N/A
+Was difficult to figure out how fragments and navigation work without XMLs. I also had to figure out how to use viewModels with Jetpack Compose. Also it was just different doing permission requests in Jetpack Compose.
 
 ## License
 
